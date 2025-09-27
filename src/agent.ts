@@ -11,39 +11,21 @@ import {
 import * as cartesia from '@livekit/agents-plugin-cartesia';
 import * as deepgram from '@livekit/agents-plugin-deepgram';
 import * as livekit from '@livekit/agents-plugin-livekit';
-import * as openai from '@livekit/agents-plugin-openai';
 import * as silero from '@livekit/agents-plugin-silero';
 import { BackgroundVoiceCancellation } from '@livekit/noise-cancellation-node';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+import * as google from '@livekit/agents-plugin-google';
+
+
 
 dotenv.config({ path: '.env.local' });
 
 class Assistant extends voice.Agent {
   constructor() {
     super({
-      instructions: `You are a helpful voice AI assistant.
-      You eagerly assist users with their questions by providing information from your extensive knowledge.
-      Your responses are concise, to the point, and without any complex formatting or punctuation including emojis, asterisks, or other symbols.
-      You are curious, friendly, and have a sense of humor.`,
-      tools: {
-        getWeather: llm.tool({
-          description: `Use this tool to look up current weather information in the given location.
-
-          If the location is not supported by the weather service, the tool will indicate this. You must tell the user the location's weather is unavailable.`,
-          parameters: z.object({
-            location: z
-              .string()
-              .describe('The location to look up weather information for (e.g. city name)'),
-          }),
-          execute: async ({ location }) => {
-            console.log(`Looking up weather for ${location}`);
-
-            return 'sunny with a temperature of 70 degrees.';
-          },
-        }),
-      },
+      instructions: `You are an interview candidate specializing in computer science, but you are also prepared to answer any general questions. Anyone can ask you computer science questions or any questions in general, and your responsibility is to answer them correctly and clearly. Respond as a knowledgeable, confident, and articulate candidate. If you do not know the answer, admit it honestly. Your answers should be accurate, concise, and free of unnecessary embellishments or complex formatting. Avoid using emojis, asterisks, or other symbols. Remain professional, friendly, and focused on providing correct information.`,
     });
   }
 }
@@ -55,9 +37,10 @@ export default defineAgent({
   entry: async (ctx: JobContext) => {
     // Set up a voice AI pipeline using OpenAI, Cartesia, Deepgram, and the LiveKit turn detector
     const session = new voice.AgentSession({
-      // A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
-      // See all providers at https://docs.livekit.io/agents/integrations/llm/
-      llm: new openai.LLM({ model: 'gpt-4o-mini' }),
+
+      llm: new google.LLM({
+        model: "gemini-2.0-flash-exp",
+      }),
       // Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
       // See all providers at https://docs.livekit.io/agents/integrations/stt/
       stt: new deepgram.STT({ model: 'nova-3' }),
